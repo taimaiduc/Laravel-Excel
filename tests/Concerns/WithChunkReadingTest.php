@@ -43,7 +43,8 @@ class WithChunkReadingTest extends TestCase
     {
         DB::connection()->enableQueryLog();
 
-        $import = new class implements ToModel, WithChunkReading, WithEvents {
+        $import = new class implements ToModel, WithChunkReading, WithEvents
+        {
             use Importable;
 
             public $before = 0;
@@ -51,7 +52,6 @@ class WithChunkReadingTest extends TestCase
 
             /**
              * @param  array  $row
-             *
              * @return Model|null
              */
             public function model(array $row)
@@ -105,12 +105,12 @@ class WithChunkReadingTest extends TestCase
     {
         DB::connection()->enableQueryLog();
 
-        $import = new class implements ToModel, WithChunkReading, WithBatchInserts {
+        $import = new class implements ToModel, WithChunkReading, WithBatchInserts
+        {
             use Importable;
 
             /**
              * @param  array  $row
-             *
              * @return Model|null
              */
             public function model(array $row)
@@ -150,12 +150,12 @@ class WithChunkReadingTest extends TestCase
     {
         DB::connection()->enableQueryLog();
 
-        $import = new class implements ToModel, WithChunkReading, WithBatchInserts, WithHeadingRow {
+        $import = new class implements ToModel, WithChunkReading, WithBatchInserts, WithHeadingRow
+        {
             use Importable;
 
             /**
              * @param  array  $row
-             *
              * @return Model|null
              */
             public function model(array $row)
@@ -195,12 +195,12 @@ class WithChunkReadingTest extends TestCase
     {
         DB::connection()->enableQueryLog();
 
-        $import = new class implements ToModel, WithChunkReading, WithBatchInserts {
+        $import = new class implements ToModel, WithChunkReading, WithBatchInserts
+        {
             use Importable;
 
             /**
              * @param  array  $row
-             *
              * @return Model|null
              */
             public function model(array $row)
@@ -240,12 +240,12 @@ class WithChunkReadingTest extends TestCase
     {
         DB::connection()->enableQueryLog();
 
-        $import = new class implements ToModel, WithChunkReading, WithBatchInserts {
+        $import = new class implements ToModel, WithChunkReading, WithBatchInserts
+        {
             use Importable;
 
             /**
              * @param  array  $row
-             *
              * @return Model|null
              */
             public function model(array $row)
@@ -283,7 +283,8 @@ class WithChunkReadingTest extends TestCase
      */
     public function can_import_to_array_in_chunks()
     {
-        $import = new class implements ToArray, WithChunkReading {
+        $import = new class implements ToArray, WithChunkReading
+        {
             use Importable;
 
             public $called = 0;
@@ -315,11 +316,12 @@ class WithChunkReadingTest extends TestCase
     /**
      * @test
      */
-    public function can_import_to_model_in_chunks_and_insert_in_batches_with_multiple_sheets_objects()
+    public function can_import_to_model_in_chunks_and_insert_in_batches_with_multiple_sheets_objects_by_index()
     {
         DB::connection()->enableQueryLog();
 
-        $import = new class implements WithMultipleSheets, WithChunkReading {
+        $import = new class implements WithMultipleSheets, WithChunkReading
+        {
             use Importable;
 
             /**
@@ -336,10 +338,10 @@ class WithChunkReadingTest extends TestCase
             public function sheets(): array
             {
                 return [
-                    new class implements ToModel, WithBatchInserts {
+                    new class implements ToModel, WithBatchInserts
+                    {
                         /**
                          * @param  array  $row
-                         *
                          * @return Model|null
                          */
                         public function model(array $row)
@@ -358,10 +360,88 @@ class WithChunkReadingTest extends TestCase
                         }
                     },
 
-                    new class implements ToModel, WithBatchInserts {
+                    new class implements ToModel, WithBatchInserts
+                    {
                         /**
                          * @param  array  $row
-                         *
+                         * @return Model|null
+                         */
+                        public function model(array $row)
+                        {
+                            return new Group([
+                                'name' => $row[0],
+                            ]);
+                        }
+
+                        /**
+                         * @return int
+                         */
+                        public function batchSize(): int
+                        {
+                            return 2000;
+                        }
+                    },
+                ];
+            }
+        };
+
+        $import->import('import-batches-multiple-sheets.xlsx');
+
+        $this->assertCount(10, DB::getQueryLog());
+        DB::connection()->disableQueryLog();
+    }
+
+    /**
+     * @test
+     */
+    public function can_import_to_model_in_chunks_and_insert_in_batches_with_multiple_sheets_objects_by_name()
+    {
+        DB::connection()->enableQueryLog();
+
+        $import = new class implements WithMultipleSheets, WithChunkReading
+        {
+            use Importable;
+
+            /**
+             * @return int
+             */
+            public function chunkSize(): int
+            {
+                return 1000;
+            }
+
+            /**
+             * @return array
+             */
+            public function sheets(): array
+            {
+                return [
+                    'Worksheet' => new class implements ToModel, WithBatchInserts
+                    {
+                        /**
+                         * @param  array  $row
+                         * @return Model|null
+                         */
+                        public function model(array $row)
+                        {
+                            return new Group([
+                                'name' => $row[0],
+                            ]);
+                        }
+
+                        /**
+                         * @return int
+                         */
+                        public function batchSize(): int
+                        {
+                            return 1000;
+                        }
+                    },
+
+                    'Worksheet2' => new class implements ToModel, WithBatchInserts
+                    {
+                        /**
+                         * @param  array  $row
                          * @return Model|null
                          */
                         public function model(array $row)
@@ -394,14 +474,14 @@ class WithChunkReadingTest extends TestCase
      */
     public function can_catch_job_failed_in_chunks()
     {
-        $import = new class implements ToModel, WithChunkReading, WithEvents {
+        $import = new class implements ToModel, WithChunkReading, WithEvents
+        {
             use Importable;
 
             public $failed = false;
 
             /**
              * @param  array  $row
-             *
              * @return Model|null
              */
             public function model(array $row)

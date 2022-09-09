@@ -68,6 +68,26 @@ class ExcelFakeTest extends TestCase
     /**
      * @test
      */
+    public function can_assert_regex_against_a_fake_stored_export_with_multiple_files()
+    {
+        ExcelFacade::fake();
+
+        $response = ExcelFacade::store($this->givenExport(), 'stored-filename-one.csv', 's3');
+
+        $this->assertTrue($response);
+
+        $response = ExcelFacade::store($this->givenExport(), 'stored-filename-two.csv', 's3');
+
+        $this->assertTrue($response);
+
+        ExcelFacade::matchByRegex();
+        ExcelFacade::assertStored('/\w{6}-\w{8}-one\.csv/', 's3');
+        ExcelFacade::assertStored('/\w{6}-\w{8}-two\.csv/', 's3');
+    }
+
+    /**
+     * @test
+     */
     public function a_callback_can_be_passed_as_the_second_argument_when_asserting_against_a_faked_stored_export()
     {
         ExcelFacade::fake();
@@ -139,6 +159,23 @@ class ExcelFakeTest extends TestCase
         ExcelFacade::assertQueuedWithChain([
             new ChainedJobStub(),
         ]);
+    }
+
+    /**
+     * @test
+     */
+    public function can_assert_against_a_fake_raw_export()
+    {
+        ExcelFacade::fake();
+
+        $response = ExcelFacade::raw($this->givenExport(), \Maatwebsite\Excel\Excel::XLSX);
+
+        $this->assertIsString($response);
+
+        ExcelFacade::assertExportedInRaw(get_class($this->givenExport()));
+        ExcelFacade::assertExportedInRaw(get_class($this->givenExport()), function (FromCollection $export) {
+            return $export->collection()->contains('foo');
+        });
     }
 
     /**
@@ -218,6 +255,24 @@ class ExcelFakeTest extends TestCase
     /**
      * @test
      */
+    public function can_assert_against_a_fake_queued_import_with_chain()
+    {
+        ExcelFacade::fake();
+
+        ExcelFacade::queueImport(
+            $this->givenQueuedImport(), 'queued-filename.csv', 's3'
+        )->chain([
+            new ChainedJobStub(),
+        ]);
+
+        ExcelFacade::assertQueuedWithChain([
+            new ChainedJobStub(),
+        ]);
+    }
+
+    /**
+     * @test
+     */
     public function a_callback_can_be_passed_as_the_second_argument_when_asserting_against_a_faked_queued_export()
     {
         ExcelFacade::fake();
@@ -239,7 +294,8 @@ class ExcelFakeTest extends TestCase
      */
     private function givenExport()
     {
-        return new class implements FromCollection {
+        return new class implements FromCollection
+        {
             /**
              * @return Collection
              */
@@ -255,7 +311,8 @@ class ExcelFakeTest extends TestCase
      */
     private function givenQueuedExport()
     {
-        return new class implements FromCollection, ShouldQueue {
+        return new class implements FromCollection, ShouldQueue
+        {
             /**
              * @return Collection
              */
@@ -271,10 +328,10 @@ class ExcelFakeTest extends TestCase
      */
     private function givenImport()
     {
-        return new class implements ToModel {
+        return new class implements ToModel
+        {
             /**
-             * @param array $row
-             *
+             * @param  array  $row
              * @return Model|null
              */
             public function model(array $row)
@@ -289,10 +346,10 @@ class ExcelFakeTest extends TestCase
      */
     private function givenQueuedImport()
     {
-        return new class implements ToModel, ShouldQueue {
+        return new class implements ToModel, ShouldQueue
+        {
             /**
-             * @param array $row
-             *
+             * @param  array  $row
              * @return Model|null
              */
             public function model(array $row)

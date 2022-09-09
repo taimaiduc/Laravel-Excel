@@ -28,12 +28,12 @@ class WithStartRowTest extends TestCase
      */
     public function can_import_each_row_to_model_with_different_start_row()
     {
-        $import = new class implements ToModel, WithStartRow {
+        $import = new class implements ToModel, WithStartRow
+        {
             use Importable;
 
             /**
-             * @param array $row
-             *
+             * @param  array  $row
              * @return Model
              */
             public function model(array $row): Model
@@ -72,11 +72,12 @@ class WithStartRowTest extends TestCase
      */
     public function can_import_to_array_with_start_row()
     {
-        $import = new class implements ToArray, WithStartRow {
+        $import = new class implements ToArray, WithStartRow
+        {
             use Importable;
 
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {

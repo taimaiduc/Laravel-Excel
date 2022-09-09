@@ -3,6 +3,8 @@
 namespace Maatwebsite\Excel\Tests\Data\Stubs;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -16,7 +18,7 @@ class FromQueryWithCustomQuerySize implements FromQuery, WithCustomQuerySize, Wi
     use Exportable;
 
     /**
-     * @return Builder
+     * @return Builder|EloquentBuilder|Relation
      */
     public function query()
     {
@@ -38,8 +40,7 @@ class FromQueryWithCustomQuerySize implements FromQuery, WithCustomQuerySize, Wi
     }
 
     /**
-     * @param Group $row
-     *
+     * @param  Group  $row
      * @return array
      */
     public function map($row): array

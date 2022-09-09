@@ -41,7 +41,8 @@ class QueuedImportTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Importable should implement ShouldQueue to be queued.');
 
-        $import = new class {
+        $import = new class
+        {
             use Importable;
         };
 
@@ -225,5 +226,29 @@ class QueuedImportTest extends TestCase
         } catch (Throwable $e) {
             $this->assertEquals('Job reached retryUntil method', $e->getMessage());
         }
+    }
+
+    /**
+     * @test
+     */
+    public function can_define_max_exceptions_property_on_queued_import()
+    {
+        $maxExceptionsCount = 0;
+
+        Queue::exceptionOccurred(function (JobExceptionOccurred $event) use (&$maxExceptionsCount) {
+            if ($event->job->resolveName() === ReadChunk::class) {
+                $maxExceptionsCount = $this->inspectJobProperty($event->job, 'maxExceptions');
+            }
+        });
+
+        try {
+            $import                = new QueuedImportWithFailure();
+            $import->maxExceptions = 3;
+            $import->queue('import-batches.xlsx');
+        } catch (Throwable $e) {
+            $this->assertEquals('Something went wrong in the chunk', $e->getMessage());
+        }
+
+        $this->assertEquals(3, $maxExceptionsCount);
     }
 }

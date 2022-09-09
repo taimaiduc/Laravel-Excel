@@ -15,13 +15,14 @@ class OnEachRowTest extends TestCase
      */
     public function can_import_each_row_individually()
     {
-        $import = new class implements OnEachRow {
+        $import = new class implements OnEachRow
+        {
             use Importable;
 
             public $called = 0;
 
             /**
-             * @param Row $row
+             * @param  Row  $row
              */
             public function onRow(Row $row)
             {

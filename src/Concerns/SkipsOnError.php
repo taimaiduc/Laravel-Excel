@@ -8,7 +8,7 @@ use Throwable;
 interface SkipsOnError
 {
     /**
-     * @param Throwable $e
+     * @param  Throwable  $e
      */
     public function onError(Throwable $e, Model $model);
 }

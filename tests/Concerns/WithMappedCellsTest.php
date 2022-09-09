@@ -28,7 +28,8 @@ class WithMappedCellsTest extends TestCase
      */
     public function can_import_with_references_to_cells()
     {
-        $import = new class implements WithMappedCells, ToArray {
+        $import = new class implements WithMappedCells, ToArray
+        {
             use Importable;
 
             /**
@@ -43,7 +44,7 @@ class WithMappedCellsTest extends TestCase
             }
 
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -62,7 +63,8 @@ class WithMappedCellsTest extends TestCase
      */
     public function can_import_with_references_to_cells_to_model()
     {
-        $import = new class implements WithMappedCells, ToModel {
+        $import = new class implements WithMappedCells, ToModel
+        {
             use Importable;
 
             /**
@@ -77,8 +79,7 @@ class WithMappedCellsTest extends TestCase
             }
 
             /**
-             * @param array $array
-             *
+             * @param  array  $array
              * @return User
              */
             public function model(array $array)

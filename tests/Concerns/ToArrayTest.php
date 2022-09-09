@@ -14,13 +14,14 @@ class ToArrayTest extends TestCase
      */
     public function can_import_to_array()
     {
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             use Importable;
 
             public $called = false;
 
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -43,13 +44,14 @@ class ToArrayTest extends TestCase
      */
     public function can_import_multiple_sheets_to_array()
     {
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             use Importable;
 
             public $called = 0;
 
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {

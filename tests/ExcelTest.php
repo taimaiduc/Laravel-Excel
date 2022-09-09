@@ -154,7 +154,8 @@ class ExcelTest extends TestCase
      */
     public function can_store_csv_export_with_custom_settings()
     {
-        $export = new class implements WithEvents, FromCollection, WithCustomCsvSettings {
+        $export = new class implements WithEvents, FromCollection, WithCustomCsvSettings
+        {
             use RegistersEventListeners;
 
             /**
@@ -200,7 +201,8 @@ class ExcelTest extends TestCase
         $this->expectException(\Maatwebsite\Excel\Exceptions\ConcernConflictException::class);
         $this->expectExceptionMessage('Cannot use FromQuery, FromArray or FromCollection and FromView on the same sheet');
 
-        $export = new class implements FromCollection, FromView {
+        $export = new class implements FromCollection, FromView
+        {
             use Exportable;
 
             /**
@@ -228,7 +230,8 @@ class ExcelTest extends TestCase
      */
     public function can_import_a_simple_xlsx_file_to_array()
     {
-        $import = new class {
+        $import = new class
+        {
             use Importable;
         };
 
@@ -245,7 +248,8 @@ class ExcelTest extends TestCase
      */
     public function can_import_a_simple_xlsx_file_to_collection()
     {
-        $import = new class {
+        $import = new class
+        {
             use Importable;
         };
 
@@ -262,9 +266,10 @@ class ExcelTest extends TestCase
      */
     public function can_import_a_simple_xlsx_file()
     {
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -285,9 +290,10 @@ class ExcelTest extends TestCase
      */
     public function can_import_a_tsv_file()
     {
-        $import = new class implements ToArray, WithCustomCsvSettings {
+        $import = new class implements ToArray, WithCustomCsvSettings
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -325,9 +331,10 @@ class ExcelTest extends TestCase
      */
     public function can_chain_imports()
     {
-        $import1 = new class implements ToArray {
+        $import1 = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -338,9 +345,10 @@ class ExcelTest extends TestCase
             }
         };
 
-        $import2 = new class implements ToArray {
+        $import2 = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -363,9 +371,10 @@ class ExcelTest extends TestCase
      */
     public function can_import_a_simple_xlsx_file_from_uploaded_file()
     {
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -384,9 +393,10 @@ class ExcelTest extends TestCase
      */
     public function can_import_a_simple_xlsx_file_from_real_path()
     {
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -407,9 +417,10 @@ class ExcelTest extends TestCase
     {
         $this->expectException(\Maatwebsite\Excel\Exceptions\NoTypeDetectedException::class);
 
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -430,9 +441,10 @@ class ExcelTest extends TestCase
     {
         $this->expectException(\Maatwebsite\Excel\Exceptions\NoTypeDetectedException::class);
 
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -448,9 +460,10 @@ class ExcelTest extends TestCase
      */
     public function can_import_without_extension_with_explicit_reader_type()
     {
-        $import = new class implements ToArray {
+        $import = new class implements ToArray
+        {
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {

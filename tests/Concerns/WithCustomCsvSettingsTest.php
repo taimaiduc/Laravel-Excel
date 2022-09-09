@@ -7,6 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ToArray;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\HeadingRowImport;
 use Maatwebsite\Excel\Tests\TestCase;
 use PHPUnit\Framework\Assert;
 
@@ -29,7 +30,8 @@ class WithCustomCsvSettingsTest extends TestCase
      */
     public function can_store_csv_export_with_custom_settings()
     {
-        $export = new class implements FromCollection, WithCustomCsvSettings {
+        $export = new class implements FromCollection, WithCustomCsvSettings
+        {
             /**
              * @return Collection
              */
@@ -53,6 +55,7 @@ class WithCustomCsvSettingsTest extends TestCase
                     'use_bom'                => true,
                     'include_separator_line' => true,
                     'excel_compatibility'    => false,
+                    'output_encoding'        => '',
                 ];
             }
         };
@@ -69,9 +72,83 @@ class WithCustomCsvSettingsTest extends TestCase
     /**
      * @test
      */
+    public function can_store_csv_export_with_custom_encoding()
+    {
+        $export = new class implements FromCollection, WithCustomCsvSettings
+        {
+            /**
+             * @return Collection
+             */
+            public function collection()
+            {
+                return collect([
+                    ['A1', '€ŠšŽžŒœŸ'],
+                    ['A2', 'åßàèòìù'],
+                ]);
+            }
+
+            /**
+             * @return array
+             */
+            public function getCsvSettings(): array
+            {
+                return [
+                    'delimiter'              => ';',
+                    'enclosure'              => '',
+                    'line_ending'            => PHP_EOL,
+                    'use_bom'                => false,
+                    'include_separator_line' => true,
+                    'excel_compatibility'    => false,
+                    'output_encoding'        => 'ISO-8859-15',
+                ];
+            }
+        };
+
+        $this->SUT->store($export, 'custom-csv-iso.csv');
+
+        $contents = file_get_contents(__DIR__ . '/../Data/Disks/Local/custom-csv-iso.csv');
+
+        Assert::assertEquals('ISO-8859-15', mb_detect_encoding($contents, 'ISO-8859-15', true));
+        Assert::assertFalse(mb_detect_encoding($contents, 'UTF-8', true));
+
+        $contents = mb_convert_encoding($contents, 'UTF-8', 'ISO-8859-15');
+
+        $this->assertStringContains('sep=;', $contents);
+        $this->assertStringContains('A1;€ŠšŽžŒœŸ', $contents);
+        $this->assertStringContains('A2;åßàèòìù', $contents);
+    }
+
+    /**
+     * @test
+     */
+    public function can_read_csv_with_auto_detecting_delimiter_semicolon()
+    {
+        $this->assertEquals([
+            [
+                ['a1', 'b1'],
+            ],
+        ], (new HeadingRowImport())->toArray('csv-with-other-delimiter.csv'));
+    }
+
+    /**
+     * @test
+     */
+    public function can_read_csv_with_auto_detecting_delimiter_comma()
+    {
+        $this->assertEquals([
+            [
+                ['a1', 'b1'],
+            ],
+        ], (new HeadingRowImport())->toArray('csv-with-comma.csv'));
+    }
+
+    /**
+     * @test
+     */
     public function can_read_csv_import_with_custom_settings()
     {
-        $import = new class implements WithCustomCsvSettings, ToArray {
+        $import = new class implements WithCustomCsvSettings, ToArray
+        {
             /**
              * @return array
              */
@@ -87,7 +164,7 @@ class WithCustomCsvSettingsTest extends TestCase
             }
 
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {
@@ -106,7 +183,8 @@ class WithCustomCsvSettingsTest extends TestCase
      */
     public function cannot_read_with_wrong_delimiter()
     {
-        $import = new class implements WithCustomCsvSettings, ToArray {
+        $import = new class implements WithCustomCsvSettings, ToArray
+        {
             /**
              * @return array
              */
@@ -118,7 +196,7 @@ class WithCustomCsvSettingsTest extends TestCase
             }
 
             /**
-             * @param array $array
+             * @param  array  $array
              */
             public function array(array $array)
             {

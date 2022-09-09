@@ -19,7 +19,8 @@ class WithColumnFormattingTest extends TestCase
      */
     public function can_export_with_column_formatting()
     {
-        $export = new class() implements FromCollection, WithMapping, WithColumnFormatting {
+        $export = new class() implements FromCollection, WithMapping, WithColumnFormatting
+        {
             use Exportable;
 
             /**
@@ -31,18 +32,19 @@ class WithColumnFormattingTest extends TestCase
                     [Carbon::createFromDate(2018, 3, 6)],
                     [Carbon::createFromDate(2018, 3, 7)],
                     [Carbon::createFromDate(2018, 3, 8)],
+                    [Carbon::createFromDate(2021, 12, 6), 100],
                 ]);
             }
 
             /**
-             * @param mixed $row
-             *
+             * @param  mixed  $row
              * @return array
              */
             public function map($row): array
             {
                 return [
                     Date::dateTimeToExcel($row[0]),
+                    isset($row[1]) ? $row[1] : null,
                 ];
             }
 
@@ -52,7 +54,8 @@ class WithColumnFormattingTest extends TestCase
             public function columnFormats(): array
             {
                 return [
-                    'A' => NumberFormat::FORMAT_DATE_DDMMYYYY,
+                    'A'     => NumberFormat::FORMAT_DATE_DDMMYYYY,
+                    'B4:B4' => NumberFormat::FORMAT_CURRENCY_EUR,
                 ];
             }
         };
@@ -64,9 +67,10 @@ class WithColumnFormattingTest extends TestCase
         $actual = $this->readAsArray(__DIR__ . '/../Data/Disks/Local/with-column-formatting-store.xlsx', 'Xlsx');
 
         $expected = [
-            ['06/03/2018'],
-            ['07/03/2018'],
-            ['08/03/2018'],
+            ['06/03/2018', null],
+            ['07/03/2018', null],
+            ['08/03/2018', null],
+            ['06/12/2021', '100 €'],
         ];
 
         $this->assertEquals($expected, $actual);

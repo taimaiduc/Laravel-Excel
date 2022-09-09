@@ -6,6 +6,7 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Excel;
+use Maatwebsite\Excel\Exporter;
 use Maatwebsite\Excel\Tests\Data\Stubs\EmptyExport;
 use Maatwebsite\Excel\Tests\TestCase;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -20,7 +21,8 @@ class ExportableTest extends TestCase
         $this->expectException(\Maatwebsite\Excel\Exceptions\NoFilenameGivenException::class);
         $this->expectExceptionMessage('A filename needs to be passed in order to download the export');
 
-        $export = new class {
+        $export = new class
+        {
             use Exportable;
         };
 
@@ -35,7 +37,8 @@ class ExportableTest extends TestCase
         $this->expectException(\Maatwebsite\Excel\Exceptions\NoFilePathGivenException::class);
         $this->expectExceptionMessage('A filepath needs to be passed in order to store the export');
 
-        $export = new class {
+        $export = new class
+        {
             use Exportable;
         };
 
@@ -50,7 +53,8 @@ class ExportableTest extends TestCase
         $this->expectException(\Maatwebsite\Excel\Exceptions\NoFilePathGivenException::class);
         $this->expectExceptionMessage('A filepath needs to be passed in order to store the export');
 
-        $export = new class {
+        $export = new class
+        {
             use Exportable;
         };
 
@@ -65,7 +69,8 @@ class ExportableTest extends TestCase
         $this->expectException(\Maatwebsite\Excel\Exceptions\NoFilenameGivenException::class);
         $this->expectExceptionMessage('A filename needs to be passed in order to download the export');
 
-        $export = new class implements Responsable {
+        $export = new class implements Responsable
+        {
             use Exportable;
         };
 
@@ -77,7 +82,8 @@ class ExportableTest extends TestCase
      */
     public function is_responsable()
     {
-        $export = new class implements Responsable {
+        $export = new class implements Responsable
+        {
             use Exportable;
 
             protected $fileName = 'export.xlsx';
@@ -95,7 +101,8 @@ class ExportableTest extends TestCase
      */
     public function can_have_customized_header()
     {
-        $export   = new class {
+        $export   = new class
+        {
             use Exportable;
         };
         $response = $export->download(
@@ -113,7 +120,8 @@ class ExportableTest extends TestCase
      */
     public function can_set_custom_headers_in_export_class()
     {
-        $export   = new class {
+        $export   = new class
+        {
             use Exportable;
 
             protected $fileName   = 'name.csv';
@@ -137,5 +145,141 @@ class ExportableTest extends TestCase
         $response = $export->raw(Excel::XLSX);
 
         $this->assertNotEmpty($response);
+    }
+
+    /**
+     * @test
+     */
+    public function can_have_customized_disk_options_when_storing()
+    {
+        $export = new EmptyExport;
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('store')->once()
+            ->with($export, 'name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+
+        $export->store('name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+    }
+
+    /**
+     * @test
+     */
+    public function can_have_customized_disk_options_when_queueing()
+    {
+        $export = new EmptyExport;
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('queue')->once()
+            ->with($export, 'name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+
+        $export->queue('name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+    }
+
+    /**
+     * @test
+     */
+    public function can_set_disk_options_in_export_class_when_storing()
+    {
+        $export = new class
+        {
+            use Exportable;
+
+            public $disk        = 's3';
+            public $writerType  = Excel::CSV;
+            public $diskOptions = ['visibility' => 'private'];
+        };
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('store')->once()
+            ->with($export, 'name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+
+        $export->store('name.csv');
+    }
+
+    /**
+     * @test
+     */
+    public function can_set_disk_options_in_export_class_when_queuing()
+    {
+        $export = new class
+        {
+            use Exportable;
+
+            public $disk        = 's3';
+            public $writerType  = Excel::CSV;
+            public $diskOptions = ['visibility' => 'private'];
+        };
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('queue')->once()
+            ->with($export, 'name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+
+        $export->queue('name.csv');
+    }
+
+    /**
+     * @test
+     */
+    public function can_override_export_class_disk_options_when_calling_store()
+    {
+        $export = new class
+        {
+            use Exportable;
+
+            public $diskOptions = ['visibility' => 'public'];
+        };
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('store')->once()
+            ->with($export, 'name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+
+        $export->store('name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+    }
+
+    /**
+     * @test
+     */
+    public function can_override_export_class_disk_options_when_calling_queue()
+    {
+        $export = new class
+        {
+            use Exportable;
+
+            public $diskOptions = ['visibility' => 'public'];
+        };
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('queue')->once()
+            ->with($export, 'name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+
+        $export->queue('name.csv', 's3', Excel::CSV, ['visibility' => 'private']);
+    }
+
+    /**
+     * @test
+     */
+    public function can_have_empty_disk_options_when_storing()
+    {
+        $export = new EmptyExport;
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('store')->once()
+            ->with($export, 'name.csv', null, null, []);
+
+        $export->store('name.csv');
+    }
+
+    /**
+     * @test
+     */
+    public function can_have_empty_disk_options_when_queueing()
+    {
+        $export = new EmptyExport;
+
+        $this->mock(Exporter::class)
+            ->shouldReceive('queue')->once()
+            ->with($export, 'name.csv', null, null, []);
+
+        $export->queue('name.csv');
     }
 }

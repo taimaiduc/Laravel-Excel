@@ -44,7 +44,8 @@ class WithMappingTest extends TestCase
      */
     public function can_return_multiple_rows_in_map()
     {
-        $export = new class implements FromArray, WithMapping {
+        $export = new class implements FromArray, WithMapping
+        {
             use Exportable;
 
             /**
@@ -60,8 +61,7 @@ class WithMappingTest extends TestCase
             }
 
             /**
-             * @param mixed $row
-             *
+             * @param  mixed  $row
              * @return array
              */
             public function map($row): array
@@ -87,7 +87,8 @@ class WithMappingTest extends TestCase
      */
     public function json_array_columns_shouldnt_be_detected_as_multiple_rows()
     {
-        $export = new class implements FromArray {
+        $export = new class implements FromArray
+        {
             use Exportable;
 
             /**
