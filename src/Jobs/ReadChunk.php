@@ -95,6 +95,8 @@ class ReadChunk implements ShouldQueue
         $this->timeout       = $import->timeout ?? null;
         $this->tries         = $import->tries ?? null;
         $this->maxExceptions = $import->maxExceptions ?? null;
+
+        $this->onQueue($import->queue ?? 'default');
     }
 
     /**
